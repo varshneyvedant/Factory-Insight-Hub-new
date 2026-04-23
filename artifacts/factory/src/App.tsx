@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,34 +14,25 @@ import AdvancesPage from "@/pages/advances";
 import CopperPage from "@/pages/copper";
 import ReportsPage from "@/pages/reports";
 import NotFound from "@/pages/not-found";
-import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
 });
 
 function AppRoutes() {
-  const { data: me, isLoading, isError } = useGetMe({ query: { retry: false, queryKey: getGetMeQueryKey() } });
-  const [location, navigate] = useLocation();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if ((isError || !me) && location !== "/login") navigate("/login");
-    if (me && location === "/login") navigate("/");
-  }, [me, isError, isLoading, location, navigate]);
+  const { data: me, isLoading } = useGetMe({ query: { retry: false, queryKey: getGetMeQueryKey() } });
+  const [location] = useLocation();
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   }
 
   if (!me) {
-    return (
-      <Switch>
-        <Route path="/login" component={LoginPage} />
-        <Route component={LoginPage} />
-      </Switch>
-    );
+    if (location !== "/login") return <Redirect to="/login" />;
+    return <LoginPage />;
   }
+
+  if (location === "/login") return <Redirect to="/" />;
 
   return (
     <Layout>
@@ -54,7 +45,6 @@ function AppRoutes() {
         <Route path="/advances" component={AdvancesPage} />
         <Route path="/copper" component={CopperPage} />
         {me.role === "owner" && <Route path="/reports" component={ReportsPage} />}
-        <Route path="/login" component={DashboardPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
