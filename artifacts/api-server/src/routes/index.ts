@@ -7,6 +7,10 @@ import salariesRouter from "./salaries";
 import advancesRouter from "./advances";
 import copperRouter from "./copper";
 import dashboardRouter from "./dashboard";
+import productionRouter from "./production";
+import customersRouter from "./customers";
+import ordersRouter from "./orders";
+import stockRouter from "./stock";
 
 const router: IRouter = Router();
 
@@ -18,5 +22,9 @@ router.use(salariesRouter);
 router.use(advancesRouter);
 router.use(copperRouter);
 router.use(dashboardRouter);
+router.use(productionRouter);
+router.use(customersRouter);
+router.use(ordersRouter);
+router.use(stockRouter);
 
 export default router;

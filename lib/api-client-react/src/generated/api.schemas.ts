@@ -261,6 +261,153 @@ export interface DashboardSummary {
   monthlyPayments: DashboardSummaryMonthlyPaymentsItem[];
 }
 
+export interface ProductionBatch {
+  id: number;
+  date: string;
+  gauge: number;
+  copperInputKg: number;
+  outputKg: number;
+  scrapKg: number;
+  operatorId?: number | null;
+  operatorName?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface ProductionBatchInput {
+  date: string;
+  /** @minimum 0 */
+  gauge: number;
+  /** @minimum 0 */
+  copperInputKg: number;
+  /** @minimum 0 */
+  outputKg: number;
+  /** @minimum 0 */
+  scrapKg?: number;
+  operatorId?: number | null;
+  notes?: string | null;
+}
+
+export type ProductionStatsLast30DaysItem = {
+  date: string;
+  outputKg: number;
+  scrapKg: number;
+};
+
+export type ProductionStatsByGaugeItem = {
+  gauge: number;
+  outputKg: number;
+};
+
+export interface ProductionStats {
+  totalBatches: number;
+  totalCopperInputKg: number;
+  totalOutputKg: number;
+  totalScrapKg: number;
+  yieldPercent: number;
+  last30Days: ProductionStatsLast30DaysItem[];
+  byGauge: ProductionStatsByGaugeItem[];
+}
+
+export interface Customer {
+  id: number;
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+  gstin?: string | null;
+  notes?: string | null;
+  totalOrders: number;
+  totalValue: number;
+  createdAt: string;
+}
+
+export interface CustomerInput {
+  /** @minLength 1 */
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+  gstin?: string | null;
+  notes?: string | null;
+}
+
+export interface SalesOrderItem {
+  id: number;
+  gauge: number;
+  quantityKg: number;
+  pricePerKg: number;
+  lineTotal: number;
+}
+
+export interface SalesOrderItemInput {
+  /** @minimum 0 */
+  gauge: number;
+  /** @minimum 0 */
+  quantityKg: number;
+  /** @minimum 0 */
+  pricePerKg: number;
+}
+
+export type SalesOrderStatus =
+  (typeof SalesOrderStatus)[keyof typeof SalesOrderStatus];
+
+export const SalesOrderStatus = {
+  pending: "pending",
+  dispatched: "dispatched",
+  cancelled: "cancelled",
+} as const;
+
+export interface SalesOrder {
+  id: number;
+  customerId: number;
+  customerName: string;
+  orderDate: string;
+  status: SalesOrderStatus;
+  notes?: string | null;
+  items: SalesOrderItem[];
+  totalQuantityKg: number;
+  totalValue: number;
+  createdAt: string;
+}
+
+export type SalesOrderInputStatus =
+  (typeof SalesOrderInputStatus)[keyof typeof SalesOrderInputStatus];
+
+export const SalesOrderInputStatus = {
+  pending: "pending",
+  dispatched: "dispatched",
+  cancelled: "cancelled",
+} as const;
+
+export interface SalesOrderInput {
+  customerId: number;
+  orderDate: string;
+  status: SalesOrderInputStatus;
+  notes?: string | null;
+  /** @minItems 1 */
+  items: SalesOrderItemInput[];
+}
+
+export type OrderStatusUpdateStatus =
+  (typeof OrderStatusUpdateStatus)[keyof typeof OrderStatusUpdateStatus];
+
+export const OrderStatusUpdateStatus = {
+  pending: "pending",
+  dispatched: "dispatched",
+  cancelled: "cancelled",
+} as const;
+
+export interface OrderStatusUpdate {
+  status: OrderStatusUpdateStatus;
+}
+
+export interface StockRow {
+  gauge: number;
+  producedKg: number;
+  dispatchedKg: number;
+  pendingKg: number;
+  availableKg: number;
+}
+
 export type ActivityItemType =
   (typeof ActivityItemType)[keyof typeof ActivityItemType];
 
@@ -293,4 +440,15 @@ export type ListSalaryPaymentsParams = {
 
 export type ListAdvancesParams = {
   employeeId?: number;
+};
+
+export type ListProductionBatchesParams = {
+  from?: string;
+  to?: string;
+  gauge?: number;
+};
+
+export type ListOrdersParams = {
+  customerId?: number;
+  status?: string;
 };

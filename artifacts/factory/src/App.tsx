@@ -12,6 +12,10 @@ import AttendancePage from "@/pages/attendance";
 import SalariesPage from "@/pages/salaries";
 import AdvancesPage from "@/pages/advances";
 import CopperPage from "@/pages/copper";
+import ProductionPage from "@/pages/production";
+import StockPage from "@/pages/stock";
+import OrdersPage from "@/pages/orders";
+import CustomersPage from "@/pages/customers";
 import ReportsPage from "@/pages/reports";
 import NotFound from "@/pages/not-found";
 
@@ -44,6 +48,10 @@ function AppRoutes() {
         <Route path="/salaries" component={SalariesPage} />
         <Route path="/advances" component={AdvancesPage} />
         <Route path="/copper" component={CopperPage} />
+        <Route path="/production" component={ProductionPage} />
+        <Route path="/stock" component={StockPage} />
+        <Route path="/orders" component={OrdersPage} />
+        <Route path="/customers" component={CustomersPage} />
         {me.role === "owner" && <Route path="/reports" component={ReportsPage} />}
         <Route component={NotFound} />
       </Switch>

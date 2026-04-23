@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, CalendarCheck, IndianRupee, HandCoins, UtilityPole, LineChart, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, IndianRupee, HandCoins, UtilityPole, LineChart, LogOut, Menu, Factory, Boxes, ShoppingCart, UserSquare2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -23,11 +23,15 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/production", label: "Production", icon: Factory },
+    { href: "/stock", label: "Stock", icon: Boxes },
+    { href: "/orders", label: "Orders", icon: ShoppingCart },
+    { href: "/customers", label: "Customers", icon: UserSquare2 },
+    { href: "/copper", label: "Copper", icon: UtilityPole },
     { href: "/employees", label: "Employees", icon: Users },
     { href: "/attendance", label: "Attendance", icon: CalendarCheck },
     { href: "/salaries", label: "Salaries", icon: IndianRupee },
     { href: "/advances", label: "Advances", icon: HandCoins },
-    { href: "/copper", label: "Copper", icon: UtilityPole },
     ...(user?.role === "owner" ? [{ href: "/reports", label: "Reports", icon: LineChart }] : []),
   ];
 

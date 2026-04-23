@@ -15,6 +15,10 @@ tags:
   - name: advances
   - name: copper
   - name: dashboard
+  - name: production
+  - name: customers
+  - name: orders
+  - name: stock
 paths:
   /healthz:
     get:
@@ -281,6 +285,185 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CopperStats" }
 
+  /production:
+    get:
+      operationId: listProductionBatches
+      tags: [production]
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { name: gauge, in: query, schema: { type: number } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProductionBatch" }
+    post:
+      operationId: createProductionBatch
+      tags: [production]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductionBatchInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductionBatch" }
+  /production/{id}:
+    delete:
+      operationId: deleteProductionBatch
+      tags: [production]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+  /production/stats:
+    get:
+      operationId: getProductionStats
+      tags: [production]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductionStats" }
+
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Customer" }
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+  /customers/{id}:
+    put:
+      operationId: updateCustomer
+      tags: [customers]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      parameters:
+        - { name: customerId, in: query, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SalesOrder" }
+    post:
+      operationId: createOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SalesOrderInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesOrder" }
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesOrder" }
+    delete:
+      operationId: deleteOrder
+      tags: [orders]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+  /orders/{id}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderStatusUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesOrder" }
+
+  /stock:
+    get:
+      operationId: getStockSummary
+      tags: [stock]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockRow" }
+
   /dashboard/summary:
     get:
       operationId: getDashboardSummary
@@ -537,6 +720,148 @@ components:
               advances: { type: number }
             required: [month, paid, advances]
       required: [totalEmployees, activeEmployees, totalSalaryPaid, totalSalaryPending, totalAdvancesGiven, copperTrend, attendanceToday, monthlyPayments]
+
+    ProductionBatch:
+      type: object
+      properties:
+        id: { type: integer }
+        date: { type: string, format: date }
+        gauge: { type: number }
+        copperInputKg: { type: number }
+        outputKg: { type: number }
+        scrapKg: { type: number }
+        operatorId: { type: integer, nullable: true }
+        operatorName: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, date, gauge, copperInputKg, outputKg, scrapKg, createdAt]
+
+    ProductionBatchInput:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        gauge: { type: number, minimum: 0 }
+        copperInputKg: { type: number, minimum: 0 }
+        outputKg: { type: number, minimum: 0 }
+        scrapKg: { type: number, minimum: 0 }
+        operatorId: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+      required: [date, gauge, copperInputKg, outputKg]
+
+    ProductionStats:
+      type: object
+      properties:
+        totalBatches: { type: integer }
+        totalCopperInputKg: { type: number }
+        totalOutputKg: { type: number }
+        totalScrapKg: { type: number }
+        yieldPercent: { type: number }
+        last30Days:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              outputKg: { type: number }
+              scrapKg: { type: number }
+            required: [date, outputKg, scrapKg]
+        byGauge:
+          type: array
+          items:
+            type: object
+            properties:
+              gauge: { type: number }
+              outputKg: { type: number }
+            required: [gauge, outputKg]
+      required: [totalBatches, totalCopperInputKg, totalOutputKg, totalScrapKg, yieldPercent, last30Days, byGauge]
+
+    Customer:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        phone: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        gstin: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        totalOrders: { type: integer }
+        totalValue: { type: number }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, totalOrders, totalValue, createdAt]
+
+    CustomerInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        phone: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        gstin: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+      required: [name]
+
+    SalesOrderItem:
+      type: object
+      properties:
+        id: { type: integer }
+        gauge: { type: number }
+        quantityKg: { type: number }
+        pricePerKg: { type: number }
+        lineTotal: { type: number }
+      required: [id, gauge, quantityKg, pricePerKg, lineTotal]
+
+    SalesOrderItemInput:
+      type: object
+      properties:
+        gauge: { type: number, minimum: 0 }
+        quantityKg: { type: number, minimum: 0 }
+        pricePerKg: { type: number, minimum: 0 }
+      required: [gauge, quantityKg, pricePerKg]
+
+    SalesOrder:
+      type: object
+      properties:
+        id: { type: integer }
+        customerId: { type: integer }
+        customerName: { type: string }
+        orderDate: { type: string, format: date }
+        status: { type: string, enum: [pending, dispatched, cancelled] }
+        notes: { type: string, nullable: true }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SalesOrderItem" }
+        totalQuantityKg: { type: number }
+        totalValue: { type: number }
+        createdAt: { type: string, format: date-time }
+      required: [id, customerId, customerName, orderDate, status, items, totalQuantityKg, totalValue, createdAt]
+
+    SalesOrderInput:
+      type: object
+      properties:
+        customerId: { type: integer }
+        orderDate: { type: string, format: date }
+        status: { type: string, enum: [pending, dispatched, cancelled] }
+        notes: { type: string, nullable: true }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/SalesOrderItemInput" }
+      required: [customerId, orderDate, status, items]
+
+    OrderStatusUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [pending, dispatched, cancelled] }
+      required: [status]
+
+    StockRow:
+      type: object
+      properties:
+        gauge: { type: number }
+        producedKg: { type: number }
+        dispatchedKg: { type: number }
+        pendingKg: { type: number }
+        availableKg: { type: number }
+      required: [gauge, producedKg, dispatchedKg, pendingKg, availableKg]
 
     ActivityItem:
       type: object

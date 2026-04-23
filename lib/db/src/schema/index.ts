@@ -50,6 +50,45 @@ export const advances = pgTable("advances", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const productionBatches = pgTable("production_batches", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  gauge: numeric("gauge", { precision: 6, scale: 3 }).notNull(),
+  copperInputKg: numeric("copper_input_kg", { precision: 12, scale: 3 }).notNull(),
+  outputKg: numeric("output_kg", { precision: 12, scale: 3 }).notNull(),
+  scrapKg: numeric("scrap_kg", { precision: 12, scale: 3 }).notNull().default("0"),
+  operatorId: integer("operator_id").references(() => employees.id, { onDelete: "set null" }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const customers = pgTable("customers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  address: text("address"),
+  gstin: text("gstin"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const salesOrders = pgTable("sales_orders", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
+  orderDate: date("order_date").notNull(),
+  status: text("status").notNull().default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const salesOrderItems = pgTable("sales_order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => salesOrders.id, { onDelete: "cascade" }),
+  gauge: numeric("gauge", { precision: 6, scale: 3 }).notNull(),
+  quantityKg: numeric("quantity_kg", { precision: 12, scale: 3 }).notNull(),
+  pricePerKg: numeric("price_per_kg", { precision: 12, scale: 2 }).notNull(),
+});
+
 export const copperEntries = pgTable("copper_entries", {
   id: serial("id").primaryKey(),
   date: date("date").notNull(),

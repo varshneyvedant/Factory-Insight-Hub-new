@@ -299,6 +299,236 @@ export const GetCopperStatsResponse = zod.object({
   ),
 });
 
+export const ListProductionBatchesQueryParams = zod.object({
+  from: zod.date().optional(),
+  to: zod.date().optional(),
+  gauge: zod.coerce.number().optional(),
+});
+
+export const ListProductionBatchesResponseItem = zod.object({
+  id: zod.number(),
+  date: zod.coerce.date(),
+  gauge: zod.number(),
+  copperInputKg: zod.number(),
+  outputKg: zod.number(),
+  scrapKg: zod.number(),
+  operatorId: zod.number().nullish(),
+  operatorName: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListProductionBatchesResponse = zod.array(
+  ListProductionBatchesResponseItem,
+);
+
+export const createProductionBatchBodyGaugeMin = 0;
+
+export const createProductionBatchBodyCopperInputKgMin = 0;
+
+export const createProductionBatchBodyOutputKgMin = 0;
+
+export const createProductionBatchBodyScrapKgMin = 0;
+
+export const CreateProductionBatchBody = zod.object({
+  date: zod.coerce.date(),
+  gauge: zod.number().min(createProductionBatchBodyGaugeMin),
+  copperInputKg: zod.number().min(createProductionBatchBodyCopperInputKgMin),
+  outputKg: zod.number().min(createProductionBatchBodyOutputKgMin),
+  scrapKg: zod.number().min(createProductionBatchBodyScrapKgMin).optional(),
+  operatorId: zod.number().nullish(),
+  notes: zod.string().nullish(),
+});
+
+export const DeleteProductionBatchParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetProductionStatsResponse = zod.object({
+  totalBatches: zod.number(),
+  totalCopperInputKg: zod.number(),
+  totalOutputKg: zod.number(),
+  totalScrapKg: zod.number(),
+  yieldPercent: zod.number(),
+  last30Days: zod.array(
+    zod.object({
+      date: zod.coerce.date(),
+      outputKg: zod.number(),
+      scrapKg: zod.number(),
+    }),
+  ),
+  byGauge: zod.array(
+    zod.object({
+      gauge: zod.number(),
+      outputKg: zod.number(),
+    }),
+  ),
+});
+
+export const ListCustomersResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string().nullish(),
+  address: zod.string().nullish(),
+  gstin: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalOrders: zod.number(),
+  totalValue: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const ListCustomersResponse = zod.array(ListCustomersResponseItem);
+
+export const CreateCustomerBody = zod.object({
+  name: zod.string().min(1),
+  phone: zod.string().nullish(),
+  address: zod.string().nullish(),
+  gstin: zod.string().nullish(),
+  notes: zod.string().nullish(),
+});
+
+export const UpdateCustomerParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateCustomerBody = zod.object({
+  name: zod.string().min(1),
+  phone: zod.string().nullish(),
+  address: zod.string().nullish(),
+  gstin: zod.string().nullish(),
+  notes: zod.string().nullish(),
+});
+
+export const UpdateCustomerResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string().nullish(),
+  address: zod.string().nullish(),
+  gstin: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalOrders: zod.number(),
+  totalValue: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+export const DeleteCustomerParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListOrdersQueryParams = zod.object({
+  customerId: zod.coerce.number().optional(),
+  status: zod.coerce.string().optional(),
+});
+
+export const ListOrdersResponseItem = zod.object({
+  id: zod.number(),
+  customerId: zod.number(),
+  customerName: zod.string(),
+  orderDate: zod.coerce.date(),
+  status: zod.enum(["pending", "dispatched", "cancelled"]),
+  notes: zod.string().nullish(),
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      gauge: zod.number(),
+      quantityKg: zod.number(),
+      pricePerKg: zod.number(),
+      lineTotal: zod.number(),
+    }),
+  ),
+  totalQuantityKg: zod.number(),
+  totalValue: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
+
+export const createOrderBodyItemsItemGaugeMin = 0;
+
+export const createOrderBodyItemsItemQuantityKgMin = 0;
+
+export const createOrderBodyItemsItemPricePerKgMin = 0;
+
+export const CreateOrderBody = zod.object({
+  customerId: zod.number(),
+  orderDate: zod.coerce.date(),
+  status: zod.enum(["pending", "dispatched", "cancelled"]),
+  notes: zod.string().nullish(),
+  items: zod
+    .array(
+      zod.object({
+        gauge: zod.number().min(createOrderBodyItemsItemGaugeMin),
+        quantityKg: zod.number().min(createOrderBodyItemsItemQuantityKgMin),
+        pricePerKg: zod.number().min(createOrderBodyItemsItemPricePerKgMin),
+      }),
+    )
+    .min(1),
+});
+
+export const GetOrderParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetOrderResponse = zod.object({
+  id: zod.number(),
+  customerId: zod.number(),
+  customerName: zod.string(),
+  orderDate: zod.coerce.date(),
+  status: zod.enum(["pending", "dispatched", "cancelled"]),
+  notes: zod.string().nullish(),
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      gauge: zod.number(),
+      quantityKg: zod.number(),
+      pricePerKg: zod.number(),
+      lineTotal: zod.number(),
+    }),
+  ),
+  totalQuantityKg: zod.number(),
+  totalValue: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+export const DeleteOrderParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateOrderStatusParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateOrderStatusBody = zod.object({
+  status: zod.enum(["pending", "dispatched", "cancelled"]),
+});
+
+export const UpdateOrderStatusResponse = zod.object({
+  id: zod.number(),
+  customerId: zod.number(),
+  customerName: zod.string(),
+  orderDate: zod.coerce.date(),
+  status: zod.enum(["pending", "dispatched", "cancelled"]),
+  notes: zod.string().nullish(),
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      gauge: zod.number(),
+      quantityKg: zod.number(),
+      pricePerKg: zod.number(),
+      lineTotal: zod.number(),
+    }),
+  ),
+  totalQuantityKg: zod.number(),
+  totalValue: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+export const GetStockSummaryResponseItem = zod.object({
+  gauge: zod.number(),
+  producedKg: zod.number(),
+  dispatchedKg: zod.number(),
+  pendingKg: zod.number(),
+  availableKg: zod.number(),
+});
+export const GetStockSummaryResponse = zod.array(GetStockSummaryResponseItem);
+
 export const GetDashboardSummaryResponse = zod.object({
   totalEmployees: zod.number(),
   activeEmployees: zod.number(),
