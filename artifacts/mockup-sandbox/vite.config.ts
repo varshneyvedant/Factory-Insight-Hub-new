@@ -1,3 +1,7 @@
+export default defineConfig({
+  base: '/Factory-Insight-Hub-new/', // <--- ADD THIS LINE
+  // ... keep everything else exactly as it was
+})
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
