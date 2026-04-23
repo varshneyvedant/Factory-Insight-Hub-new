@@ -14,21 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Node.js
+        uses: actions/checkout@v4 # You can use v6 if your repo supports it
+      - name: Install Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24 # Modernizing for 2026
           cache: 'npm'
       - name: Install dependencies
         run: npm install
       - name: Build
         run: npm run build
+      - name: Debug Output # This helps us see why it's 404-ing
+        run: ls -R dist/
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist/' # This is where Vite puts the finished website
-
+          path: 'dist/' # Ensure this matches your Vite output folder
   deploy:
     needs: build_site
     runs-on: ubuntu-latest
