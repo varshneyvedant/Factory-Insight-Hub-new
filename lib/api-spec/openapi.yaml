@@ -1,36 +1,550 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Manufacturing management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: employees
+  - name: attendance
+  - name: salaries
+  - name: advances
+  - name: copper
+  - name: dashboard
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in with role + password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionUser" }
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      responses:
+        "204": { description: No Content }
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionUser" }
+
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: array
+                items: { $ref: "#/components/schemas/Employee" }
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmployeeInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Employee" }
+  /employees/{id}:
+    get:
+      operationId: getEmployee
+      tags: [employees]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmployeeDetail" }
+    put:
+      operationId: updateEmployee
+      tags: [employees]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmployeeInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Employee" }
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+
+  /attendance:
+    get:
+      operationId: listAttendance
+      tags: [attendance]
+      parameters:
+        - { name: employeeId, in: query, schema: { type: integer } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AttendanceRecord" }
+    post:
+      operationId: recordAttendance
+      tags: [attendance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AttendanceInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AttendanceRecord" }
+  /attendance/{id}:
+    delete:
+      operationId: deleteAttendance
+      tags: [attendance]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+
+  /salaries:
+    get:
+      operationId: listSalaryPayments
+      tags: [salaries]
+      parameters:
+        - { name: employeeId, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SalaryPayment" }
+    post:
+      operationId: createSalaryPayment
+      tags: [salaries]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SalaryPaymentInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalaryPayment" }
+  /salaries/{id}:
+    delete:
+      operationId: deleteSalaryPayment
+      tags: [salaries]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+
+  /advances:
+    get:
+      operationId: listAdvances
+      tags: [advances]
+      parameters:
+        - { name: employeeId, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Advance" }
+    post:
+      operationId: createAdvance
+      tags: [advances]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdvanceInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Advance" }
+  /advances/{id}:
+    delete:
+      operationId: deleteAdvance
+      tags: [advances]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+
+  /copper:
+    get:
+      operationId: listCopperEntries
+      tags: [copper]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CopperEntry" }
+    post:
+      operationId: createCopperEntry
+      tags: [copper]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CopperEntryInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CopperEntry" }
+  /copper/{id}:
+    delete:
+      operationId: deleteCopperEntry
+      tags: [copper]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: No Content }
+  /copper/stats:
+    get:
+      operationId: getCopperStats
+      tags: [copper]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CopperStats" }
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+  /dashboard/employee-balances:
+    get:
+      operationId: getEmployeeBalances
+      tags: [dashboard]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EmployeeBalance" }
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ActivityItem" }
+
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
 
+    LoginRequest:
+      type: object
+      properties:
+        role: { type: string, enum: [owner, manager] }
+        password: { type: string }
+      required: [role, password]
+
+    SessionUser:
+      type: object
+      properties:
+        role: { type: string, enum: [owner, manager] }
+      required: [role]
+
+    Employee:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        position: { type: string }
+        phone: { type: string, nullable: true }
+        dailyWage: { type: number }
+        monthlySalary: { type: number }
+        joiningDate: { type: string, format: date }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, position, dailyWage, monthlySalary, joiningDate, active, createdAt]
+
+    EmployeeInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        position: { type: string, minLength: 1 }
+        phone: { type: string, nullable: true }
+        dailyWage: { type: number, minimum: 0 }
+        monthlySalary: { type: number, minimum: 0 }
+        joiningDate: { type: string, format: date }
+        active: { type: boolean }
+      required: [name, position, dailyWage, monthlySalary, joiningDate]
+
+    EmployeeDetail:
+      type: object
+      properties:
+        employee: { $ref: "#/components/schemas/Employee" }
+        attendance:
+          type: array
+          items: { $ref: "#/components/schemas/AttendanceRecord" }
+        salaryPayments:
+          type: array
+          items: { $ref: "#/components/schemas/SalaryPayment" }
+        advances:
+          type: array
+          items: { $ref: "#/components/schemas/Advance" }
+        balance: { $ref: "#/components/schemas/EmployeeBalance" }
+      required: [employee, attendance, salaryPayments, advances, balance]
+
+    AttendanceRecord:
+      type: object
+      properties:
+        id: { type: integer }
+        employeeId: { type: integer }
+        employeeName: { type: string }
+        date: { type: string, format: date }
+        status: { type: string, enum: [present, absent, half_day] }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, employeeId, employeeName, date, status, createdAt]
+
+    AttendanceInput:
+      type: object
+      properties:
+        employeeId: { type: integer }
+        date: { type: string, format: date }
+        status: { type: string, enum: [present, absent, half_day] }
+        notes: { type: string, nullable: true }
+      required: [employeeId, date, status]
+
+    SalaryPayment:
+      type: object
+      properties:
+        id: { type: integer }
+        employeeId: { type: integer }
+        employeeName: { type: string }
+        amount: { type: number }
+        paymentDate: { type: string, format: date }
+        periodMonth: { type: string }
+        status: { type: string, enum: [paid, pending] }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, employeeId, employeeName, amount, paymentDate, periodMonth, status, createdAt]
+
+    SalaryPaymentInput:
+      type: object
+      properties:
+        employeeId: { type: integer }
+        amount: { type: number, minimum: 0 }
+        paymentDate: { type: string, format: date }
+        periodMonth: { type: string, description: "YYYY-MM" }
+        status: { type: string, enum: [paid, pending] }
+        notes: { type: string, nullable: true }
+      required: [employeeId, amount, paymentDate, periodMonth, status]
+
+    Advance:
+      type: object
+      properties:
+        id: { type: integer }
+        employeeId: { type: integer }
+        employeeName: { type: string }
+        amount: { type: number }
+        date: { type: string, format: date }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, employeeId, employeeName, amount, date, createdAt]
+
+    AdvanceInput:
+      type: object
+      properties:
+        employeeId: { type: integer }
+        amount: { type: number, minimum: 0 }
+        date: { type: string, format: date }
+        notes: { type: string, nullable: true }
+      required: [employeeId, amount, date]
+
+    CopperEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        date: { type: string, format: date }
+        marketPrice: { type: number }
+        purchasePrice: { type: number }
+        quantityKg: { type: number }
+        vendor: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, date, marketPrice, purchasePrice, quantityKg, createdAt]
+
+    CopperEntryInput:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        marketPrice: { type: number, minimum: 0 }
+        purchasePrice: { type: number, minimum: 0 }
+        quantityKg: { type: number, minimum: 0 }
+        vendor: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+      required: [date, marketPrice, purchasePrice, quantityKg]
+
+    CopperStats:
+      type: object
+      properties:
+        currentPrice: { type: number, nullable: true }
+        currentMarketPrice: { type: number, nullable: true }
+        averagePurchasePrice: { type: number, nullable: true }
+        averageMarketPrice: { type: number, nullable: true }
+        diffFromAverage: { type: number, nullable: true }
+        diffPercent: { type: number, nullable: true }
+        trend: { type: string, enum: [up, down, flat, none] }
+        totalEntries: { type: integer }
+        totalQuantityKg: { type: number }
+        totalSpend: { type: number }
+        last30Days:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              marketPrice: { type: number }
+              purchasePrice: { type: number }
+            required: [date, marketPrice, purchasePrice]
+      required: [trend, totalEntries, totalQuantityKg, totalSpend, last30Days]
+
+    EmployeeBalance:
+      type: object
+      properties:
+        employeeId: { type: integer }
+        employeeName: { type: string }
+        position: { type: string }
+        monthlySalary: { type: number }
+        totalEarned: { type: number }
+        totalPaid: { type: number }
+        totalAdvances: { type: number }
+        remainingDue: { type: number }
+        daysPresent: { type: integer }
+        daysAbsent: { type: integer }
+      required: [employeeId, employeeName, position, monthlySalary, totalEarned, totalPaid, totalAdvances, remainingDue, daysPresent, daysAbsent]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalEmployees: { type: integer }
+        activeEmployees: { type: integer }
+        totalSalaryPaid: { type: number }
+        totalSalaryPending: { type: number }
+        totalAdvancesGiven: { type: number }
+        copperCurrentPrice: { type: number, nullable: true }
+        copperAveragePrice: { type: number, nullable: true }
+        copperTrend: { type: string, enum: [up, down, flat, none] }
+        attendanceToday:
+          type: object
+          properties:
+            present: { type: integer }
+            absent: { type: integer }
+            halfDay: { type: integer }
+          required: [present, absent, halfDay]
+        monthlyPayments:
+          type: array
+          items:
+            type: object
+            properties:
+              month: { type: string }
+              paid: { type: number }
+              advances: { type: number }
+            required: [month, paid, advances]
+      required: [totalEmployees, activeEmployees, totalSalaryPaid, totalSalaryPending, totalAdvancesGiven, copperTrend, attendanceToday, monthlyPayments]
+
+    ActivityItem:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [salary, advance, attendance, copper, employee] }
+        title: { type: string }
+        subtitle: { type: string }
+        amount: { type: number, nullable: true }
+        timestamp: { type: string, format: date-time }
+      required: [id, type, title, subtitle, timestamp]

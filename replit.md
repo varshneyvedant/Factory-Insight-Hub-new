@@ -1,27 +1,32 @@
-# Workspace
+# Factory Manager
 
-## Overview
+Internal management system for a small Indian copper-wire / electrical-goods factory.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Features
+- **Roles** — Owner (full access including reports & employee CRUD) and Manager (data entry only).
+- **Pages** — Dashboard, Employees (list + detail), Attendance, Salaries, Advances, Copper purchases, Reports.
+- **Auth** — Simple role-based login with signed cookies (`fm_role`).
+- Money in INR, dates in DD MMM YYYY, charts in recharts.
 
-## Stack
+## Default credentials (dev)
+- Owner: `owner123`
+- Manager: `manager123`
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+Override via `OWNER_PASSWORD` / `MANAGER_PASSWORD` env vars. Cookies signed by `SESSION_SECRET`.
 
-## Key Commands
+## Architecture
+- **Artifacts**
+  - `artifacts/factory` — React + Vite web app at `/`
+  - `artifacts/api-server` — Express API at `/api`
+- **Shared libs**
+  - `lib/api-spec` — OpenAPI source of truth
+  - `lib/api-zod` — generated Zod validators
+  - `lib/api-client-react` — generated TanStack Query hooks (uses `customFetch` with `credentials: "include"`)
+  - `lib/db` — Drizzle ORM schema + Postgres client
+- **Database** — Postgres (Replit-managed). Tables: employees, attendance, salary_payments, advances, copper_entries.
+- Money stored as numeric strings, serialized to numbers in API responses.
+- Attendance POST is upsert-style (one record per employee per date).
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
-
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Workflow
+- Edit OpenAPI spec → run `pnpm --filter @workspace/api-spec run codegen` → both client and server use new types.
+- Edit `lib/db/src/schema/index.ts` → run `pnpm --filter @workspace/db run push`.
